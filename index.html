@@ -1,0 +1,80 @@
+<head>
+
+</head>
+<body>
+    <h1>Video Info</h1>
+    <form>
+
+        <div>
+            <label>Select a video</label>
+            <!-- taking in video "file in Browser"
+                
+               accept = "video/*":  only accept the video files
+                                    It cannot recognize any other files.             
+            -->
+            <input type="file" accept="video/*" />
+        </div>
+        <button type="submit">Get Info</button>
+    </form>
+
+    <h1 class = "result" ></h1>
+
+    <script>
+
+        // IPC system is accessed only through the electron module.
+        // It works only in Electron browser which arleady has a "nodejs" context.
+        // [FYI] Chrome does not have node modules.
+        // So we do need to deal with many nodejs modules in the Main Window side, an Electron browser.
+        const electron = require('electron'); 
+
+        // object of ipc system from the electron library
+        // The object enables Main Window to start communication with Electron App.
+        const { ipcRenderer } = electron;
+
+        // addEventListener('event name = "submit"', callback)
+        document.querySelector('form').addEventListener('submit', (event) => {
+            
+            // prevent reload the webpage.
+            // Threrefore, the info investigated get remain 
+            //  even after the submit button is clicked. 
+            event.preventDefault();
+
+            // It makes the code stop running and then investigated.
+            // debugger;
+
+            /*
+                When it is in debugger mode in browser's console,
+                we can use "files" property 
+            */
+              
+            
+            // To investigate the file info
+            //document.querySelector('input').files
+            // files[] is a property of "document" ***
+            // const file = document.querySelector('input').files[0];
+        
+            // Because we are finding video file's duration, 
+            // We just need path of the "file" object above.
+            const { path } = document.querySelector('input').files[0];
+
+            
+
+            // 'getVideoMetaData' => current event name here we made above
+            // path = { path } above
+            ipcRenderer.send('gotVideoFile', path);
+            console.log('path in Main   ', path)
+
+        });
+        
+        // "duration" is a data from "metadata.format.duration" from index.js
+        ipcRenderer.on('gotVideoLength', (event, duration) => {
+
+
+           //  document.querySelector('.reslut').innerHTML = duration;
+               document.querySelector('.result').innerHTML = `Video is ${duration} seconds.`;
+        });
+
+
+    </script>
+
+</body>
